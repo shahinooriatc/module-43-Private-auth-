@@ -1,0 +1,24 @@
+.Products-container{
+    display: flex;
+    margin:15px 5px;
+    border-bottom: 1px solid lightgray;
+}
+.products-image{
+    cursor: pointer;
+}
+.products-info{
+    margin: 5px 10px;
+}
+.products-cart-btn{
+    margin-top: 50px;
+}
+.cart-btn > span{
+    margin-left: 10px;
+}
+.cart-btn{
+    height: 30px;
+    width: 150px;
+    background-color: goldenrod;
+    border: 1px solid gray;
+    border-radius: 5px;
+}
