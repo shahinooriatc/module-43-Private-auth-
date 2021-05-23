@@ -8,6 +8,7 @@
 # firebase config
 /src/component/login/firebase.config
 
+
 # testing
 /coverage
 
