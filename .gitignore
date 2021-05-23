@@ -9,6 +9,7 @@
 /src/component/login/firebase.config
 
 
+
 # testing
 /coverage
 
@@ -25,4 +26,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+src/Components/Login/firebase.config.js
 src/Components/Login/firebase.config.js
