@@ -2,7 +2,8 @@ import './Login.css';
 import firebase from 'firebase/app';
 import "firebase/auth";
 import firebaseConfig from './firebase.config';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { userContext } from '../../App';
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
@@ -11,17 +12,21 @@ function Login() {
   //Create new user checkbox...
   const [newUser, setNewUser] = useState(false);
 
+  //Use Context for LoggedInUser....
+  const [LoggedInUser, setLoggedInUser] = useContext(userContext);
+
   //User state default...
   const [user, setUser] = useState({
     isSignedIn: false,
     displayName: '',
     email: '',
     password: '',
+    photoURL: '',
     phoneNumber: '',
-    gb: '',
     success: false,
     error: ''
   })
+
 
   //User Input Form Validation using Regex... 
   const handleBlur = (event) => {
@@ -56,7 +61,9 @@ function Login() {
           newUserInfo.error = '';
           newUserInfo.success = true;
           setUser(newUserInfo);
-          updateUserInfo(user.displayName, user.age);
+          updateUserInfo(user.displayName, user.phoneNumber);
+          console.log(result.user);
+          console.log('user state', user);
         })
         .catch((error) => {
           const newUserInfo = { ...user };
@@ -71,15 +78,14 @@ function Login() {
     if (!newUser && user.email && user.password) {
       firebase.auth().signInWithEmailAndPassword(user.email, user.password)
         .then(result => {
-          console.log('Logged in successfully');
-          console.log(result);
-          const user = result.user;
-          console.log(user);
+          console.log(result.user);
           // Signed in
-          const newUserInfo = { ...user };
+          const newUserInfo = { ...result.user };
           newUserInfo.error = '';
           newUserInfo.success = true;
           setUser(newUserInfo);
+          setLoggedInUser(newUserInfo);
+          console.log('after logged in', newUserInfo);
         })
         .catch((error) => {
           const newUserInfo = { ...user };
@@ -94,15 +100,15 @@ function Login() {
 
   }
   //Update user information....
-  const updateUserInfo = (displayName, age) => {
+  const updateUserInfo = (displayName, phoneNumber) => {
     const user = firebase.auth().currentUser;
 
     user.updateProfile({
       displayName: displayName,
-      photoURL: age
+      phoneNumber: phoneNumber
     })
       .then(result => {
-        console.log('from updata result', result);
+        console.log(result);
         // Update successful.
       }).catch(function (error) {
         // An error happened.
@@ -209,7 +215,6 @@ function Login() {
           <input type="email" name="email" onBlur={handleBlur} placeholder='Email' required /><br />
           <input type="password" name='password' onBlur={handleBlur} placeholder='Password ex: Jhon#3' required /><br />
           {newUser && <input type="password" onBlur={handleBlur} placeholder='Confirm Password' required />} <br />
-          {newUser && <input type="number" name='age' onBlur={handleBlur} placeholder='Age' />} <br />
           {newUser && <input type="contact" name='phoneNumber' onBlur={handleBlur} placeholder='Phone Number' />} <br />
           {newUser ? <input type="submit" value="Sign Up" /> : <input type="submit" value="Sign In" />}
 
@@ -238,14 +243,19 @@ function Login() {
         {/* /After Sign In User information display.... */}
 
       </div>
-      {user.isSignedIn &&
-        <div className="user-profile">
-          <h4>Name : {user.displayName}</h4>
-          <h5>Email : {user.email}</h5>
-          <h5>Phone : {user.phoneNumber}</h5>
-          <img src={user.photoURL} alt="" />
-        </div>
+
+      <div>
+        {user.displayName ?
+          <div className="current-user">
+            <h5>Current User : {user.displayName}</h5>
+            <p>Email : {user.email}</p>
+            <h5>Phone : {user.phoneNumber}</h5>
+            <img style={{ height: '80px', width: '80px', borderRadius: '25px' }} src={user.photoURL} alt="" />
+
+          </div> : <h3>Please Login First</h3>
       }
+      </div>
+
     </div>
   );
 }
