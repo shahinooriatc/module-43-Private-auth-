@@ -4,6 +4,7 @@ import "firebase/auth";
 import firebaseConfig from './firebase.config';
 import { useContext, useState } from 'react';
 import { userContext } from '../../App';
+import { useHistory, useLocation } from 'react-router';
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
@@ -11,9 +12,6 @@ function Login() {
 
   //Create new user checkbox...
   const [newUser, setNewUser] = useState(false);
-
-  //Use Context for LoggedInUser....
-  const [LoggedInUser, setLoggedInUser] = useContext(userContext);
 
   //User state default...
   const [user, setUser] = useState({
@@ -27,6 +25,13 @@ function Login() {
     error: ''
   })
 
+  //Use Context for LoggedInUser....
+  const [LoggedInUser, setLoggedInUser] = useContext(userContext);
+
+  //Redirect to shipment after logged in ....
+  const history = useHistory();
+  const location = useLocation();
+  const { from } = location.state || { from: { pathname: "/" } };
 
   //User Input Form Validation using Regex... 
   const handleBlur = (event) => {
@@ -85,6 +90,8 @@ function Login() {
           newUserInfo.success = true;
           setUser(newUserInfo);
           setLoggedInUser(newUserInfo);
+          history.replace(from);
+
           console.log('after logged in', newUserInfo);
         })
         .catch((error) => {
@@ -253,7 +260,7 @@ function Login() {
             <img style={{ height: '80px', width: '80px', borderRadius: '25px' }} src={user.photoURL} alt="" />
 
           </div> : <h3>Please Login First</h3>
-      }
+        }
       </div>
 
     </div>
