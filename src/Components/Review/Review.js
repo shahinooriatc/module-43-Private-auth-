@@ -42,7 +42,6 @@ const Review = () => {
 
     return (
         <div className='shop-container'>
-            {/* <Login></Login> */}
             <div className="product-container">
 
                 {

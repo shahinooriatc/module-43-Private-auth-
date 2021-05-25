@@ -1,13 +1,10 @@
 import './Login.css';
-import firebase from 'firebase/app';
-import "firebase/auth";
-import firebaseConfig from './firebase.config';
 import { useContext, useState } from 'react';
 import { userContext } from '../../App';
 import { useHistory, useLocation } from 'react-router';
+import { handleFbSignIn, handleGithubSignIn, handleGoogleSignIn, handleSignOut, InitializeLoginFrameworks } from './LoginManager';
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
+InitializeLoginFrameworks();
 function Login() {
 
   //Create new user checkbox...
@@ -26,12 +23,13 @@ function Login() {
   })
 
   //Use Context for LoggedInUser....
-  const [LoggedInUser, setLoggedInUser] = useContext(userContext);
+  const [loggedInUser, setLoggedInUser] = useContext(userContext);
 
   //Redirect to shipment after logged in ....
   const history = useHistory();
   const location = useLocation();
   const { from } = location.state || { from: { pathname: "/" } };
+
 
   //User Input Form Validation using Regex... 
   const handleBlur = (event) => {
@@ -47,11 +45,7 @@ function Login() {
       newUserInfo[event.target.name] = event.target.value;
       setUser(newUserInfo);
     }
-
   }
-  //Email validator:/(.+)@(.+){2,}\.(.+){2,}/
-  //StrongRegex Password =/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
-  //Phone number validator:/\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/
 
 
   // User Form Submit...
@@ -59,157 +53,57 @@ function Login() {
 
     //Create New User Account Using Email & Password...
     if (newUser && user.email && user.password) {
-      firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-        .then(result => {
-          // Signed in 
-          const newUserInfo = { ...user };
-          newUserInfo.error = '';
-          newUserInfo.success = true;
-          setUser(newUserInfo);
-          updateUserInfo(user.displayName, user.phoneNumber);
-          console.log(result.user);
-          console.log('user state', user);
-        })
-        .catch((error) => {
-          const newUserInfo = { ...user };
-          newUserInfo.error = error.message;
-          newUserInfo.success = false;
-          setUser(newUserInfo);
-        });
+
     }
 
     //Sign in With Email & Password...
-
     if (!newUser && user.email && user.password) {
-      firebase.auth().signInWithEmailAndPassword(user.email, user.password)
-        .then(result => {
-          console.log(result.user);
-          // Signed in
-          const newUserInfo = { ...result.user };
-          newUserInfo.error = '';
-          newUserInfo.success = true;
-          setUser(newUserInfo);
-          setLoggedInUser(newUserInfo);
-          history.replace(from);
-
-          console.log('after logged in', newUserInfo);
-        })
-        .catch((error) => {
-          const newUserInfo = { ...user };
-          newUserInfo.error = error.message;
-          newUserInfo.success = false;
-          setUser(newUserInfo);
-        });
 
     }
     event.preventDefault();
     event.target.reset();
 
   }
-  //Update user information....
-  const updateUserInfo = (displayName, phoneNumber) => {
-    const user = firebase.auth().currentUser;
-
-    user.updateProfile({
-      displayName: displayName,
-      phoneNumber: phoneNumber
-    })
+  //Google Login....
+  const googleSignIn = () => {
+    handleGoogleSignIn()
       .then(result => {
         console.log(result);
-        // Update successful.
-      }).catch(function (error) {
-        // An error happened.
-      });
+        setUser(result);
+        setLoggedInUser(result);
+      })
   }
 
-
-  //Google Sign In... with Provider...
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  const handleGoogleSignIn = () => {
-    firebase.auth()
-      .signInWithPopup(googleProvider)
+  //Facebook Login....
+  const facebookSignIn = () => {
+    handleFbSignIn()
       .then(result => {
-        // const { displayName, email, photoURL } = result.user;
-        // // Create new variable signedInUser to store user information.... 
-        // const signedInUser = { isSignedIn: true, name: displayName, email: email, photo: photoURL };
-        //Set again user new information...
-        // setUser(signedInUser);
-        setUser(result.user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorEmail = error.email;
-        const errorMessage = error.message;
-        setUser(errorMessage);
-        console.log(errorCode, errorEmail, errorMessage);
-      });
-  }
-
-  //Sign In with Facebook provider...
-  const fbProvider = new firebase.auth.FacebookAuthProvider();
-  const handleFbSignIn = () => {
-    firebase
-      .auth()
-      .signInWithPopup(fbProvider)
-      .then((result) => {
-        // The signed-in user info.
-        const user = result.user;
-        setUser(user)
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        console.log(errorCode, errorMessage, email, credential);
-      });
-
-  }
-
-  //Sign in with GitHub provider...
-  const githubProvider = new firebase.auth.GithubAuthProvider();
-  const handleGithubSignIn = () => {
-    firebase
-      .auth()
-      .signInWithPopup(githubProvider)
-      .then((result) => {
-        const user = result.user;
-        setUser(user);
-        console.log(user);
-      }).catch((error) => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        console.log(errorCode, errorMessage, email, credential);
-      });
-  }
-
-  //Sign in with Tweeter Provider.....
-
-
-
-
-  // Sign Out from all provider...
-  const handleSignOut = () => {
-    firebase.auth().signOut()
-      .then(() => {
-        // Sign-out successful.
-        const signOutUser = {
-          isSignedIn: false
-        }
-        setUser(signOutUser);
-      })
-      .catch(error => {
-        console.log('session Out');
+        setUser(result);
+        setLoggedInUser(result);
       })
   }
+  //GitHub Login....
+  const githubSignIn = () => {
+    handleGithubSignIn()
+      .then(result => {
+        setUser(result);
+        setLoggedInUser(result);
+      })
+  }
+
+  const signOut = () => {
+    handleSignOut()
+      .then(result => {
+        setUser(result);
+        setLoggedInUser(result);
+      })
+  }
+
+
+
+
+
+
 
   return (
     <div className="App container">
@@ -239,20 +133,21 @@ function Login() {
       <div className="signIn-button">
         {/* /Sign in button google provider  */}
         {
-          user.isSignedIn ? <button className='btn btn-warning' onClick={handleSignOut}> Sign Out</button>
-            : <button className='btn btn-danger' onClick={handleGoogleSignIn} >Sign In with Google</button>
+          user.isSignedIn ? <button className='btn btn-warning' onClick={signOut}> Sign Out</button>
+            : <button className='btn btn-danger' onClick={googleSignIn} >Sign In with Google</button>
         }
         <br />
         {/* /Sign in button Facebook provider  */}
-        <button className='btn btn-primary' onClick={handleFbSignIn}>Sign In with Facebook</button>
+        <button className='btn btn-primary' onClick={facebookSignIn}>Sign In with Facebook</button>
         <br />
-        <button className='btn btn-info' onClick={handleGithubSignIn}>Sign in with GitHub</button>
+        <button className='btn btn-info' onClick={githubSignIn}>Sign in with GitHub</button>
         {/* /After Sign In User information display.... */}
 
       </div>
 
       <div>
-        {user.displayName ?
+
+        {user.isSignedIn ?
           <div className="current-user">
             <h5>Current User : {user.displayName}</h5>
             <p>Email : {user.email}</p>

@@ -27,12 +27,12 @@ function App() {
           <Route path="/shop">
             <Shop></Shop>
           </Route>
-          <Route path='/review'>
+          <PrivateRoute path='/review'>
             <Review></Review>
-          </Route>
-          <Route path='/inventory'>
+          </PrivateRoute>
+          <PrivateRoute path='/inventory'>
             <Inventory></Inventory>
-          </Route>
+          </PrivateRoute>
           <Route path='/login'>
             <Login></Login>
           </Route>
