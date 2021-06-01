@@ -12,7 +12,7 @@ import NotFound from './Components/NotFound/NotFound';
 import ProductDetails from './Components/ProductDetails/ProductDetails';
 import Login from './Components/Login/Login';
 import Shipment from './Components/Shipment/Shipment';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useState } from 'react';
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute';
 
 export const userContext = createContext();
@@ -27,9 +27,9 @@ function App() {
           <Route path="/shop">
             <Shop></Shop>
           </Route>
-          <PrivateRoute path='/review'>
+          <Route path='/review'>
             <Review></Review>
-          </PrivateRoute>
+          </Route>
           <PrivateRoute path='/inventory'>
             <Inventory></Inventory>
           </PrivateRoute>

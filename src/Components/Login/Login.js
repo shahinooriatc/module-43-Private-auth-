@@ -2,10 +2,18 @@ import './Login.css';
 import { useContext, useState } from 'react';
 import { userContext } from '../../App';
 import { useHistory, useLocation } from 'react-router';
-import { handleFbSignIn, handleGithubSignIn, handleGoogleSignIn, handleSignOut, InitializeLoginFrameworks } from './LoginManager';
-// Initialize Firebase
-InitializeLoginFrameworks();
+import {
+  InitializeLoginFrameworks,
+  handleGoogleSignIn, handleFbSignIn, handleGithubSignIn,
+  handleSignOut, CreateNewUserWithEmailAndPassword,
+  loginUserWithEmailAndPassword,
+} from './LoginManager';
+
+
+
 function Login() {
+  // Initialize Firebase
+  InitializeLoginFrameworks();
 
   //Create new user checkbox...
   const [newUser, setNewUser] = useState(false);
@@ -22,8 +30,9 @@ function Login() {
     error: ''
   })
 
+
   //Use Context for LoggedInUser....
-  const [loggedInUser, setLoggedInUser] = useContext(userContext);
+  const [LoggedInUser, setLoggedInUser] = useContext(userContext);
 
   //Redirect to shipment after logged in ....
   const history = useHistory();
@@ -47,18 +56,29 @@ function Login() {
     }
   }
 
-
   // User Form Submit...
   const handleFormSubmit = (event) => {
 
     //Create New User Account Using Email & Password...
     if (newUser && user.email && user.password) {
-
+      CreateNewUserWithEmailAndPassword(user.displayName, user.email, user.password)
+        .then(result => {
+          setUser(result);          
+          setLoggedInUser(result);          
+          history.replace(from);
+        })
     }
 
     //Sign in With Email & Password...
     if (!newUser && user.email && user.password) {
-
+      loginUserWithEmailAndPassword(user.email, user.password)
+        .then(result => {
+          setUser(result);
+          var { displayName, email } = result;
+          let newUserInfo = { displayName: displayName, email: email }
+          setLoggedInUser(newUserInfo);
+          history.replace(from);
+        })
     }
     event.preventDefault();
     event.target.reset();
@@ -68,9 +88,10 @@ function Login() {
   const googleSignIn = () => {
     handleGoogleSignIn()
       .then(result => {
-        console.log(result);
         setUser(result);
         setLoggedInUser(result);
+        console.log(LoggedInUser);
+        history.replace(from);
       })
   }
 
@@ -88,6 +109,8 @@ function Login() {
       .then(result => {
         setUser(result);
         setLoggedInUser(result);
+        history.replace(from);
+
       })
   }
 
@@ -98,10 +121,6 @@ function Login() {
         setLoggedInUser(result);
       })
   }
-
-
-
-
 
 
 
@@ -122,7 +141,6 @@ function Login() {
 
         </form>
       </div>
-
 
       {/* Error Message */}
       <p style={{ color: 'red' }}>{user.error}</p>
@@ -145,8 +163,7 @@ function Login() {
 
       </div>
 
-      <div>
-
+      {/* <div>
         {user.isSignedIn ?
           <div className="current-user">
             <h5>Current User : {user.displayName}</h5>
@@ -156,7 +173,7 @@ function Login() {
 
           </div> : <h3>Please Login First</h3>
         }
-      </div>
+      </div> */}
 
     </div>
   );

@@ -1,0 +1,16 @@
+.shipment-form {
+    margin: 30px 100px;
+}
+
+.shipment-form input {
+  display: block;
+  width: 300px;
+  margin: 20px;
+  padding: 5px;
+  border:1px solid gray;
+  border-radius: 5px;
+}
+.errors {
+  color: red;
+
+}

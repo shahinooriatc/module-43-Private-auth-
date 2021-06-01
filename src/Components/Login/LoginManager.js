@@ -17,48 +17,56 @@ export const InitializeLoginFrameworks = () => {
 
 
 //Create New User With Email & Password....
-// export const CreateNewUserWithEmailAndPassword = () => {
-//     firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-//         .then(result => {
-//             // Signed in 
-//             const newUserInfo = { ...user };
-//             newUserInfo.error = '';
-//             newUserInfo.success = true;
-//             setUser(newUserInfo);
-//             updateUserInfo(user.displayName, user.phoneNumber);
-//             console.log(result.user);
-//             console.log('user state', user);
-//         })
-//         .catch((error) => {
-//             const newUserInfo = { ...user };
-//             newUserInfo.error = error.message;
-//             newUserInfo.success = false;
-//             setUser(newUserInfo);
-//         });
-// }
+export const CreateNewUserWithEmailAndPassword = (displayName, email, password) => {
+    return firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(result => {
+            // Signed in 
+            const newUserInfo = result.user;
+            newUserInfo.error = '';
+            newUserInfo.success = true;
+            updateUserInfo(displayName);
+            return newUserInfo;
+
+        })
+        .catch((error) => {
+            const newUserInfo = {};
+            newUserInfo.error = error.message;
+            newUserInfo.success = false;
+            return newUserInfo;
+        });
+}
+
+//Update user information....
+const updateUserInfo = (displayName) => {
+    const user = firebase.auth().currentUser;
+    user.updateProfile({
+        displayName: displayName
+    })
+        .then(result => {
+            // Update successful.
+        }).catch(function (error) {
+            // An error happened.
+        });
+}
 
 //Login user with Email & Password....
-// export const loginUserWithEmailAndPassword = () => {
-//     firebase.auth().signInWithEmailAndPassword(user.email, user.password)
-//         .then(result => {
-//             console.log(result.user);
-//             // Signed in
-//             const newUserInfo = { ...result.user };
-//             newUserInfo.error = '';
-//             newUserInfo.success = true;
-//             setUser(newUserInfo);
-//             setLoggedInUser(newUserInfo);
-//             history.replace(from);
+export const loginUserWithEmailAndPassword = (email, password) => {
+    return firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(result => {
+            // Signed in
+            const newUserInfo = result.user;
+            newUserInfo.error = '';
+            newUserInfo.success = true;
+            return newUserInfo;
 
-//             console.log('after logged in', newUserInfo);
-//         })
-//         .catch((error) => {
-//             const newUserInfo = { ...user };
-//             newUserInfo.error = error.message;
-//             newUserInfo.success = false;
-//             setUser(newUserInfo);
-//         });
-// }
+        })
+        .catch((error) => {
+            const newUserInfo = {};
+            newUserInfo.error = error.message;
+            newUserInfo.success = false;
+            return newUserInfo;
+        });
+}
 
 
 //Google Sign In... with Provider...
@@ -69,7 +77,7 @@ export const handleGoogleSignIn = () => {
         .then(result => {
             const { displayName, email, photoURL } = result.user;
             // // Create new variable signedInUser to store user information.... 
-            const signedInUser = { isSignedIn: true, displayName: displayName, email: email, photoURL: photoURL };
+            const signedInUser = { isSignedIn: true, displayName: displayName, email: email, photoURL: photoURL, success: true };
             //Set again user new information...
             return signedInUser;
             // setUser(result.user);
@@ -78,7 +86,6 @@ export const handleGoogleSignIn = () => {
             const errorCode = error.code;
             const errorEmail = error.email;
             const errorMessage = error.message;
-            setUser(errorMessage);
             console.log(errorCode, errorEmail, errorMessage);
         });
 }
@@ -89,18 +96,16 @@ export const handleFbSignIn = () => {
 
     firebase.auth().signInWithPopup(fbProvider)
         .then((result) => {
+            console.log(result);
             const user = result.user;
+            user.success = true;
             return user;
         })
         .catch((error) => {
-            // Handle Errors here.
             var errorCode = error.code;
             var errorMessage = error.message;
-            // The email of the user's account used.
             var email = error.email;
-            // The firebase.auth.AuthCredential type that was used.
-            var credential = error.credential;
-            console.log(errorCode, errorMessage, email, credential);
+            console.log(errorCode, errorMessage, email);
         });
 
 }
@@ -111,9 +116,11 @@ export const handleGithubSignIn = () => {
 
     return firebase.auth().signInWithPopup(githubProvider)
         .then((result) => {
-            console.log(result);
-            const user = result.user;
-            return user;
+            const { displayName, email, photoURL } = result.user;
+            // // Create new variable signedInUser to store user information.... 
+            const signedInUser = { isSignedIn: true, displayName: displayName, email: email, photoURL: photoURL };
+            //Set again user new information...
+            return signedInUser;
         }).catch((error) => {
             // Handle Errors here.
             var errorCode = error.code;
@@ -141,18 +148,4 @@ export const handleSignOut = () => {
 }
 
 
-//Update user information....
-const updateUserInfo = (displayName, phoneNumber) => {
-    const user = firebase.auth().currentUser;
 
-    user.updateProfile({
-        displayName: displayName,
-        phoneNumber: phoneNumber
-    })
-        .then(result => {
-            console.log(result);
-            // Update successful.
-        }).catch(function (error) {
-            // An error happened.
-        });
-}
