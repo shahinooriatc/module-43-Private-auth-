@@ -21,12 +21,12 @@ export const CreateNewUserWithEmailAndPassword = (displayName, email, password) 
     return firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(result => {
             // Signed in 
-            const newUserInfo = result.user;
+            const { email, photoURL } = result.user;
+            const newUserInfo = { email, photoURL, displayName };
             newUserInfo.error = '';
             newUserInfo.success = true;
             updateUserInfo(displayName);
             return newUserInfo;
-
         })
         .catch((error) => {
             const newUserInfo = {};
@@ -80,7 +80,6 @@ export const handleGoogleSignIn = () => {
             const signedInUser = { isSignedIn: true, displayName: displayName, email: email, photoURL: photoURL, success: true };
             //Set again user new information...
             return signedInUser;
-            // setUser(result.user);
         })
         .catch((error) => {
             const errorCode = error.code;

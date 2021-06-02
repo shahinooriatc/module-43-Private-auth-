@@ -63,8 +63,8 @@ function Login() {
     if (newUser && user.email && user.password) {
       CreateNewUserWithEmailAndPassword(user.displayName, user.email, user.password)
         .then(result => {
-          setUser(result);          
-          setLoggedInUser(result);          
+          setUser(result);
+          setLoggedInUser(result);
           history.replace(from);
         })
     }
@@ -89,8 +89,8 @@ function Login() {
     handleGoogleSignIn()
       .then(result => {
         setUser(result);
+        console.log(result);
         setLoggedInUser(result);
-        console.log(LoggedInUser);
         history.replace(from);
       })
   }
